@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PRD – AI Credit Card Recommendation Engine | FreechargeBiz</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --brand: #6c3fc5;
+      --brand-light: #8b5cf6;
+      --brand-dark: #4c2891;
+      --accent: #f59e0b;
+      --green: #10b981;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --bg: #f8f7ff;
+      --card: #ffffff;
+      --text: #1e1b4b;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 2px 16px rgba(108,63,197,0.08);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ── SIDEBAR NAV ── */
+    .layout { display: flex; min-height: 100vh; }
+
+    aside {
+      width: 260px;
+      background: #fff;
+      border-right: 1px solid var(--border);
+      padding: 28px 20px;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 50;
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 32px;
+    }
+    .sidebar-logo .icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-light));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 800; font-size: 13px;
+    }
+    .sidebar-logo .name { font-weight: 700; font-size: 14px; }
+    .sidebar-logo .name span { color: var(--brand); }
+
+    .sidebar-section { margin-bottom: 8px; }
+    .sidebar-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 1px;
+      padding: 0 8px;
+      margin-bottom: 4px;
+    }
+    .sidebar-link {
+      display: block;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+    .sidebar-link:hover { background: #f5f3ff; color: var(--brand); }
+    .sidebar-link.active { background: #ede9fe; color: var(--brand); font-weight: 600; }
+
+    .sidebar-meta {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+    }
+    .meta-chip {
+      background: #f5f3ff;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+    .meta-chip strong { display: block; color: var(--brand); font-size: 12px; }
+
+    /* ── MAIN CONTENT ── */
+    main {
+      margin-left: 260px;
+      flex: 1;
+      padding: 48px 56px;
+      max-width: 960px;
+    }
+
+    /* Doc header */
+    .doc-header {
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 32px;
+      margin-bottom: 48px;
+    }
+    .doc-tag {
+      background: #ede9fe;
+      color: var(--brand);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+    .doc-title { font-size: 36px; font-weight: 900; line-height: 1.15; margin-bottom: 12px; }
+    .doc-title span { color: var(--brand); }
+    .doc-subtitle { font-size: 16px; color: var(--muted); max-width: 600px; margin-bottom: 24px; }
+    .doc-meta-row { display: flex; gap: 24px; flex-wrap: wrap; }
+    .doc-meta-item { font-size: 13px; color: var(--muted); }
+    .doc-meta-item strong { color: var(--text); }
+
+    /* Sections */
+    section { margin-bottom: 56px; scroll-margin-top: 24px; }
+    .section-number {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--brand);
+      margin-bottom: 4px;
+    }
+    h2 {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 6px;
+      border-left: 4px solid var(--brand);
+      padding-left: 14px;
+    }
+    .section-intro {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 24px;
+      padding-left: 18px;
+    }
+    h3 { font-size: 17px; font-weight: 700; margin: 24px 0 10px; }
+    h4 { font-size: 14px; font-weight: 700; margin: 16px 0 6px; color: var(--brand); }
+    p { font-size: 14px; margin-bottom: 12px; }
+    ul, ol { padding-left: 20px; margin-bottom: 12px; }
+    li { font-size: 14px; margin-bottom: 4px; }
+    strong { font-weight: 700; }
+
+    /* Cards / Boxes */
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+    }
+    .card-grid { display: grid; gap: 16px; }
+    .card-grid-2 { grid-template-columns: 1fr 1fr; }
+    .card-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    /* Persona cards */
+    .persona-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    .persona-avatar {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      margin-bottom: 14px;
+    }
+    .persona-name { font-size: 16px; font-weight: 800; margin-bottom: 2px; }
+    .persona-role { font-size: 12px; color: var(--muted); margin-bottom: 12px; font-weight: 600; }
+    .persona-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
+    .persona-row .label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.5px; min-width: 70px; }
+    .persona-row .val { font-size: 13px; }
+    .persona-pain {
+      background: #fef2f2;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 12px;
+      color: #991b1b;
+      margin-top: 12px;
+    }
+    .persona-goal {
+      background: #f0fdf4;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 12px;
+      color: #065f46;
+      margin-top: 6px;
+    }
+
+    /* Journey flow */
+    .journey-steps { display: flex; flex-direction: column; gap: 0; }
+    .journey-step {
+      display: flex;
+      gap: 20px;
+      position: relative;
+    }
+    .journey-step::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 44px;
+      bottom: -1px;
+      width: 2px;
+      background: var(--border);
+    }
+    .journey-step:last-child::before { display: none; }
+    .js-left { display: flex; flex-direction: column; align-items: center; }
+    .js-num {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--brand);
+      color: #fff;
+      font-weight: 800;
+      font-size: 15px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .js-body { padding: 8px 0 32px; }
+    .js-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+    .js-sub { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+    .js-detail { font-size: 13px; }
+    .js-tag {
+      display: inline-block;
+      background: #ede9fe;
+      color: var(--brand);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 8px;
+      margin-right: 4px;
+      margin-top: 6px;
+    }
+    .js-tag.green { background: #d1fae5; color: #065f46; }
+    .js-tag.orange { background: #fef3c7; color: #92400e; }
+
+    /* Tech arch */
+    .arch-layer {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 12px;
+      border-left: 4px solid var(--brand);
+      box-shadow: var(--shadow);
+    }
+    .arch-layer.green { border-left-color: var(--green); }
+    .arch-layer.blue { border-left-color: var(--blue); }
+    .arch-layer.orange { border-left-color: var(--accent); }
+    .arch-layer.red { border-left-color: var(--red); }
+    .arch-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+    .arch-items { display: flex; flex-wrap: wrap; gap: 8px; }
+    .arch-chip {
+      background: #f3f4f6;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    /* Data table */
+    .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .data-table th {
+      background: #f5f3ff;
+      color: var(--brand);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 10px 14px;
+      text-align: left;
+    }
+    .data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table tr:hover td { background: #faf8ff; }
+    .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; }
+    .tag-must { background: #fee2e2; color: #991b1b; }
+    .tag-should { background: #fef3c7; color: #92400e; }
+    .tag-could { background: #dbeafe; color: #1e40af; }
+    .tag-wont { background: #f3f4f6; color: var(--muted); }
+    .tag-high { background: #d1fae5; color: #065f46; }
+    .tag-med { background: #fef3c7; color: #92400e; }
+    .tag-low { background: #f3f4f6; color: var(--muted); }
+
+    /* User Story cards */
+    .story-card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 20px 24px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+    .story-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .story-id { font-size: 11px; font-weight: 700; color: var(--muted); }
+    .story-quote {
+      font-size: 14px;
+      font-style: italic;
+      color: var(--text);
+      border-left: 3px solid var(--brand);
+      padding-left: 12px;
+      margin-bottom: 14px;
+      line-height: 1.6;
+    }
+    .story-ac-title { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 8px; }
+    .ac-item {
+      display: flex;
+      gap: 8px;
+      font-size: 13px;
+      margin-bottom: 5px;
+      align-items: flex-start;
+    }
+    .ac-item::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+    /* KPI / Metrics */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
+    .kpi-card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 18px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      text-align: center;
+    }
+    .kpi-value { font-size: 28px; font-weight: 900; color: var(--brand); margin-bottom: 4px; }
+    .kpi-label { font-size: 12px; color: var(--muted); }
+    .kpi-baseline { font-size: 11px; color: var(--red); margin-top: 4px; }
+
+    /* Risk table */
+    .risk-row { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); align-items: flex-start; }
+    .risk-row:last-child { border-bottom: none; }
+    .risk-icon { font-size: 20px; flex-shrink: 0; width: 32px; }
+    .risk-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+    .risk-desc { font-size: 12px; color: var(--muted); }
+    .risk-mit { font-size: 12px; color: var(--green); margin-top: 4px; }
+
+    /* Callout */
+    .callout {
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 13px;
+    }
+    .callout-purple { background: #f5f3ff; border-left: 3px solid var(--brand); }
+    .callout-green { background: #f0fdf4; border-left: 3px solid var(--green); }
+    .callout-orange { background: #fffbeb; border-left: 3px solid var(--accent); }
+    .callout-icon { font-size: 18px; flex-shrink: 0; }
+
+    /* RICE table */
+    .rice-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .rice-table th {
+      background: #1e1b4b;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 10px 14px;
+      text-align: left;
+    }
+    .rice-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    .rice-table tr:last-child td { border-bottom: none; }
+    .rice-table tr:hover td { background: #faf8ff; }
+    .rice-score { font-weight: 800; color: var(--brand); font-size: 15px; }
+
+    /* Divider */
+    hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+    /* Sprint table */
+    .sprint-block { margin-bottom: 24px; }
+    .sprint-title {
+      background: var(--brand);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 8px 8px 0 0;
+    }
+    .sprint-items {
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      overflow: hidden;
+    }
+    .sprint-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .sprint-item:last-child { border-bottom: none; }
+    .sprint-item:hover { background: #faf8ff; }
+    .story-pts {
+      background: #ede9fe;
+      color: var(--brand);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+
+    @media (max-width: 900px) {
+      aside { display: none; }
+      main { margin-left: 0; padding: 24px 20px; }
+      .card-grid-2, .card-grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<aside>
+  <div class="sidebar-logo">
+    <div class="icon">FC</div>
+    <div class="name">Free<span>charge</span> Biz</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">DOCUMENT</div>
+    <a class="sidebar-link active" href="#overview">Overview</a>
+    <a class="sidebar-link" href="#problem">Problem Statement</a>
+    <a class="sidebar-link" href="#personas">User Personas</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">PRODUCT</div>
+    <a class="sidebar-link" href="#features">Core Features</a>
+    <a class="sidebar-link" href="#journey">User Journey</a>
+    <a class="sidebar-link" href="#tech">Technical Architecture</a>
+    <a class="sidebar-link" href="#data">Data Strategy</a>
+  </div>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">DELIVERY</div>
+    <a class="sidebar-link" href="#stories">User Stories</a>
+    <a class="sidebar-link" href="#prioritization">Prioritization</a>
+    <a class="sidebar-link" href="#sprints">Sprint Plan</a>
+    <a class="sidebar-link" href="#metrics">Success Metrics</a>
+    <a class="sidebar-link" href="#risks">Risks</a>
+  </div>
+
+  <div class="sidebar-meta">
+    <div class="meta-chip">
+      <strong>PRD v1.0 — May 2026</strong>
+      FreechargeBiz × Axis Bank<br/>
+      Status: <span style="color:var(--green);">● Draft for Review</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ════════════════ MAIN ════════════════ -->
+<main>
+
+  <!-- DOC HEADER -->
+  <div class="doc-header" id="overview">
+    <div class="doc-tag">PRODUCT REQUIREMENT DOCUMENT</div>
+    <div class="doc-title">AI-Powered Credit Card<br/><span>Recommendation Engine</span></div>
+    <div class="doc-subtitle">An intelligent, contextual card-matching product that uses a user's financial footprint to surface the most relevant Axis Bank / Freecharge credit card — personalised, instant, and high-converting.</div>
+    <div class="doc-meta-row">
+      <div class="doc-meta-item"><strong>Author:</strong> Product Team, FreechargeBiz</div>
+      <div class="doc-meta-item"><strong>Partner:</strong> Axis Bank</div>
+      <div class="doc-meta-item"><strong>Status:</strong> Draft v1.0</div>
+      <div class="doc-meta-item"><strong>Date:</strong> May 2026</div>
+      <div class="doc-meta-item"><strong>MVP Target:</strong> 8 weeks</div>
+    </div>
+  </div>
+
+  <!-- ══ 1. PROBLEM STATEMENT ══ -->
+  <section id="problem">
+    <div class="section-number">SECTION 01</div>
+    <h2>Problem Statement</h2>
+    <p class="section-intro">Why today's credit card marketplace is broken — and why users leave before converting.</p>
+
+    <div class="callout callout-orange">
+      <div class="callout-icon">⚠️</div>
+      <div><strong>The core issue:</strong> India's credit card market has 100M+ addressable users, yet card discovery journeys are static, generic, and trust-eroding — resulting in drop-off rates above 70% on most aggregator platforms.</div>
+    </div>
+
+    <h3>Current State Problems</h3>
+    <div class="card-grid card-grid-3">
+      <div class="card">
+        <h4>😩 Information Overload</h4>
+        <p>Users face 50+ card options with dense feature tables. No prioritisation, no personalisation. They can't determine which card matches their actual lifestyle.</p>
+      </div>
+      <div class="card">
+        <h4>📋 Rigid Questionnaires</h4>
+        <p>Traditional forms ask 15–20 fields upfront (income, employer, PAN, DOB) before showing a single result. Users abandon before seeing value.</p>
+      </div>
+      <div class="card">
+        <h4>🔒 Trust Deficit</h4>
+        <p>Users don't understand what data is being collected, why, and how it's used. Fear of hard credit pulls causes high exit rates at the data-consent stage.</p>
+      </div>
+      <div class="card">
+        <h4>🎯 Poor Matching Quality</h4>
+        <p>Most aggregators show the same "popular" cards regardless of user profile. A fuel-heavy driver and a frequent flier get identical recommendations.</p>
+      </div>
+      <div class="card">
+        <h4>📉 High Drop-off Rates</h4>
+        <p>Industry average completion rate for card application flows is under 30%. Friction at every step compounds to a terrible funnel.</p>
+      </div>
+      <div class="card">
+        <h4>💸 Missed Revenue</h4>
+        <p>For FreechargeBiz, each unmatched user is a lost referral fee. Poor recommendations also lead to lower card activation and spend — hurting LTV.</p>
+      </div>
+    </div>
+
+    <h3>Opportunity</h3>
+    <p>Freecharge sits on a rich dataset: UPI transaction history, prepaid recharges, bill payments, and existing user financial profiles. Combined with SMS-based spend intelligence and soft bureau pulls, FreechargeBiz can deliver <strong>a sub-5-question, AI-driven recommendation</strong> that feels personalised from the first interaction — while being transparent and trust-building throughout.</p>
+  </section>
+
+  <!-- ══ 2. USER PERSONAS ══ -->
+  <section id="personas">
+    <div class="section-number">SECTION 02</div>
+    <h2>User Personas</h2>
+    <p class="section-intro">Four distinct user archetypes drive the majority of credit card interest on the platform.</p>
+
+    <div class="card-grid card-grid-2">
+
+      <div class="persona-card">
+        <div class="persona-avatar" style="background:#dbeafe;">🚗</div>
+        <div class="persona-name">Rahul Sharma</div>
+        <div class="persona-role">The Daily Commuter</div>
+        <div class="persona-row"><span class="label">AGE</span><span class="val">28, Pune</span></div>
+        <div class="persona-row"><span class="label">JOB</span><span class="val">Sales Executive, ₹6L p.a.</span></div>
+        <div class="persona-row"><span class="label">SPENDS</span><span class="val">Fuel (₹8K/mo), food delivery, weekend shopping</span></div>
+        <div class="persona-row"><span class="label">GOAL</span><span class="val">Save money on petrol; get a card that pays him back</span></div>
+        <div class="persona-row"><span class="label">TECH</span><span class="val">Uses Google Pay, PhonePe daily</span></div>
+        <div class="persona-pain">😤 Pain: Spent 20 minutes on a bank website, answered 15 questions, then got rejected because he didn't have a CIBIL score above 750.</div>
+        <div class="persona-goal">✅ Goal: A fuel + cashback card with zero annual fee, found in under 3 minutes.</div>
+      </div>
+
+      <div class="persona-card">
+        <div class="persona-avatar" style="background:#d1fae5;">✈️</div>
+        <div class="persona-name">Priya Nair</div>
+        <div class="persona-role">The Frequent Flier</div>
+        <div class="persona-row"><span class="label">AGE</span><span class="val">34, Bengaluru</span></div>
+        <div class="persona-row"><span class="label">JOB</span><span class="val">Senior Manager, ₹22L p.a.</span></div>
+        <div class="persona-row"><span class="label">SPENDS</span><span class="val">Flights (₹25K/mo), business dinners, hotels</span></div>
+        <div class="persona-row"><span class="label">GOAL</span><span class="val">Free flights, lounge access, concierge</span></div>
+        <div class="persona-row"><span class="label">TECH</span><span class="val">Power user; tracks card spend via apps</span></div>
+        <div class="persona-pain">😤 Pain: Holding 3 cards but none earns optimally on airline spend. Overwhelmed researching upgrades.</div>
+        <div class="persona-goal">✅ Goal: One premium card that covers all travel perks with a clear miles-earned calculator.</div>
+      </div>
+
+      <div class="persona-card">
+        <div class="persona-avatar" style="background:#fef3c7;">🛍️</div>
+        <div class="persona-name">Simran Kaur</div>
+        <div class="persona-role">The Online Shopper</div>
+        <div class="persona-row"><span class="label">AGE</span><span class="val">24, Delhi</span></div>
+        <div class="persona-row"><span class="label">JOB</span><span class="val">Content creator, ₹4.5L p.a.</span></div>
+        <div class="persona-row"><span class="label">SPENDS</span><span class="val">Flipkart, Myntra, Zomato, OTT subscriptions</span></div>
+        <div class="persona-row"><span class="label">GOAL</span><span class="val">Cashback & instant rewards; zero annual fee</span></div>
+        <div class="persona-row"><span class="label">TECH</span><span class="val">Freecharge power user, uses UPI for everything</span></div>
+        <div class="persona-pain">😤 Pain: Income too irregular for traditional bank requirements; gets rejected without explanation.</div>
+        <div class="persona-goal">✅ Goal: A starter card with real cashback on her day-to-day spends with easy eligibility criteria.</div>
+      </div>
+
+      <div class="persona-card">
+        <div class="persona-avatar" style="background:#ede9fe;">🏢</div>
+        <div class="persona-name">Vikram Mehta</div>
+        <div class="persona-role">The SME Owner</div>
+        <div class="persona-row"><span class="label">AGE</span><span class="val">42, Mumbai</span></div>
+        <div class="persona-row"><span class="label">JOB</span><span class="val">Business owner, ₹40L+ p.a.</span></div>
+        <div class="persona-row"><span class="label">SPENDS</span><span class="val">Business travel, vendor payments, bulk fuel</span></div>
+        <div class="persona-row"><span class="label">GOAL</span><span class="val">High credit limit, reward multipliers, tax benefits</span></div>
+        <div class="persona-row"><span class="label">TECH</span><span class="val">Moderate; relies on CA for financial decisions</span></div>
+        <div class="persona-pain">😤 Pain: No platform clearly explains which super-premium card fits business spends; CA gives generic advice.</div>
+        <div class="persona-goal">✅ Goal: A Magnus / Infinite-tier card with concierge and expense management integration.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ 3. CORE FEATURES ══ -->
+  <section id="features">
+    <div class="section-number">SECTION 03</div>
+    <h2>Core Features</h2>
+    <p class="section-intro">Grouped by module, ordered by user interaction sequence.</p>
+
+    <h3>Module A — Smart Onboarding & Consent</h3>
+    <div class="card">
+      <ul>
+        <li><strong>Progressive disclosure:</strong> Show value before asking for data. Hero screen shows a curated card gallery before any form.</li>
+        <li><strong>Modular consent:</strong> Users pick which data sources to share (SMS, bureau soft-pull, UPI statement upload). Each option clearly explains the benefit and privacy guarantee.</li>
+        <li><strong>Mobile-first OTP verification:</strong> Phone number capture triggers a soft identity match against the Freecharge user base — pre-filling known data silently.</li>
+        <li><strong>Trust signals:</strong> "No hard credit pull", "Data encrypted", "Withdraw anytime" shown persistently during consent.</li>
+      </ul>
+    </div>
+
+    <h3>Module B — Contextual Data Collection</h3>
+    <div class="card">
+      <ul>
+        <li><strong>Conversational micro-survey:</strong> Maximum 4 questions, chip-based multi-select and sliders — no text input required.</li>
+        <li><strong>SMS analysis (with consent):</strong> Parse bank SMSes to auto-detect: top spend categories, average monthly spend, active lenders, card EMI obligations.</li>
+        <li><strong>Bureau soft pull:</strong> Retrieve CIBIL / Experian score range (not exact score) to filter eligible cards. Displayed back as "Good / Excellent / Outstanding" — no number shown to avoid anxiety.</li>
+        <li><strong>Freecharge transaction graph:</strong> Internal signal — recharge frequency, bill payment categories, UPI transaction volume used as behavioural proxies.</li>
+      </ul>
+    </div>
+
+    <h3>Module C — AI Recommendation Engine</h3>
+    <div class="card">
+      <ul>
+        <li><strong>Multi-factor scoring:</strong> Each card scored against (a) spend category match, (b) income-based eligibility, (c) user preference, (d) bureau eligibility band, (e) existing card portfolio gap.</li>
+        <li><strong>Explainability layer:</strong> Every recommendation comes with 3 human-readable "Why this card fits you" reasons — driven by the actual data signals, not static copy.</li>
+        <li><strong>Ranked alternatives:</strong> Show top match + 3 alternatives. User can tap any alternative to see a full comparison and swap it to primary.</li>
+        <li><strong>Benefit calculator:</strong> "You could earn ₹X in cashback per year based on your ₹Y monthly spend" — a real-time projection shown on the result page.</li>
+      </ul>
+    </div>
+
+    <h3>Module D — Application & Handoff</h3>
+    <div class="card">
+      <ul>
+        <li><strong>Instant apply flow:</strong> Pre-filled application form using data already collected. User only provides PAN, DOB, and employment details they haven't shared.</li>
+        <li><strong>In-app status tracking:</strong> Application status card in Freecharge home screen (Submitted → Under Review → Approved → Card Dispatched).</li>
+        <li><strong>Smart nudges:</strong> Push/SMS notification at each status update. If rejected, automatically surface the next-best eligible card.</li>
+        <li><strong>Re-engagement:</strong> 30-day re-recommendation trigger — if a user didn't apply, re-run the engine with updated bureau data and surface a fresh recommendation.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ══ 4. USER JOURNEY ══ -->
+  <section id="journey">
+    <div class="section-number">SECTION 04</div>
+    <h2>End-to-End User Journey</h2>
+    <p class="section-intro">From first touch to card-in-hand — mapped across all six stages.</p>
+
+    <div class="journey-steps">
+      <div class="journey-step">
+        <div class="js-left"><div class="js-num">1</div></div>
+        <div class="js-body">
+          <div class="js-title">Discovery & Awareness</div>
+          <div class="js-sub">User lands on the Freecharge app / web entry point</div>
+          <div class="js-detail">User sees the "Smart Card Match" banner on the Freecharge home tab or enters via a referral link / performance marketing ad. The hero screen immediately shows three relevant card previews and communicates "2 min, no credit impact" to reduce anxiety.</div>
+          <span class="js-tag">Channel: In-app banner</span>
+          <span class="js-tag orange">Channel: Meta / Google ad</span>
+          <span class="js-tag green">Drop-off risk: Low</span>
+        </div>
+      </div>
+
+      <div class="journey-step">
+        <div class="js-left"><div class="js-num">2</div></div>
+        <div class="js-body">
+          <div class="js-title">Consent & Identity</div>
+          <div class="js-sub">User selects data sharing preferences and verifies phone</div>
+          <div class="js-detail">User is shown three toggleable data sources with plain-English explanations. At minimum, phone + self-declared answers suffice. SMS and bureau pull are optional but unlock better recommendations. A clear privacy note and RBI-aligned consent banner are displayed. OTP verification completes identity anchoring.</div>
+          <span class="js-tag">Trust: Transparent opt-in</span>
+          <span class="js-tag orange">Drop-off risk: Medium</span>
+          <span class="js-tag green">Mitigation: Show value of each data source</span>
+        </div>
+      </div>
+
+      <div class="journey-step">
+        <div class="js-left"><div class="js-num">3</div></div>
+        <div class="js-body">
+          <div class="js-title">Contextual Data Collection</div>
+          <div class="js-sub">4-step micro-survey + background data signals</div>
+          <div class="js-detail">User answers 4 quick questions (spend categories → monthly spend → income range → top priority). In parallel, if consented, the backend fetches SMS-parsed spend categories and a soft bureau score band. Pre-filled answers (from Freecharge history) are shown as defaults — user can override. Progress bar shows completion momentum.</div>
+          <span class="js-tag">UX: Chip select + sliders</span>
+          <span class="js-tag green">Completion target: 85%</span>
+        </div>
+      </div>
+
+      <div class="journey-step">
+        <div class="js-left"><div class="js-num">4</div></div>
+        <div class="js-body">
+          <div class="js-title">AI Matching & Loading</div>
+          <div class="js-sub">Animated processing screen while engine runs</div>
+          <div class="js-detail">A reassuring "analysing your profile" screen shows four sequentially ticking steps (SMS analysis → bureau check → ML model → personalisation). This takes 3–5 seconds in production. The animation buys time while building perceived intelligence and trust in the output. Timeout fallback: if any signal fails, the engine gracefully degrades to self-declared data only.</div>
+          <span class="js-tag">Duration: 3–5 sec</span>
+          <span class="js-tag orange">Fallback: Self-declared only</span>
+        </div>
+      </div>
+
+      <div class="journey-step">
+        <div class="js-left"><div class="js-num">5</div></div>
+        <div class="js-body">
+          <div class="js-title">Personalised Recommendation</div>
+          <div class="js-sub">Top card + match score + explainability + alternatives</div>
+          <div class="js-detail">The primary recommendation is displayed with a visual card UI, match score, 3 personalised "Why this card" reasons, and key benefit chips (cashback %, lounge visits, annual fee). A projected annual savings figure contextualises the benefit. Three alternative cards are shown below — clickable to swap. The CTA "Apply Now – Instant Approval" is always visible above the fold.</div>
+          <span class="js-tag green">Goal: Apply CTA click &gt;40%</span>
+          <span class="js-tag">Explainability: Always shown</span>
+        </div>
+      </div>
+
+      <div class="journey-step">
+        <div class="js-left"><div class="js-num">6</div></div>
+        <div class="js-body">
+          <div class="js-title">Application & Post-Apply</div>
+          <div class="js-sub">Pre-filled form → submission → status tracking</div>
+          <div class="js-detail">Tapping "Apply Now" opens a pre-filled form (name, mobile, income pre-populated). User adds PAN + DOB. Form submits to Axis Bank API. Confirmation screen shows a reference number. Freecharge home screen gains an "Application Status" card. Push notifications track Submitted → Approved → Dispatched. If rejected, next-best eligible card is surfaced immediately.</div>
+          <span class="js-tag green">Feature: Rejection recovery flow</span>
+          <span class="js-tag orange">SLA: Status update within 48h</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 5. TECHNICAL ARCHITECTURE ══ -->
+  <section id="tech">
+    <div class="section-number">SECTION 05</div>
+    <h2>Technical Architecture</h2>
+    <p class="section-intro">A layered, API-first architecture designed for low-latency recommendations and graceful degradation.</p>
+
+    <div class="callout callout-purple">
+      <div class="callout-icon">🏗️</div>
+      <div><strong>Design principle:</strong> Every layer must be independently operable. If the bureau API is slow, the recommendation engine runs on self-declared data. If SMS parsing fails, declared spend categories take precedence. Graceful degradation over hard failures.</div>
+    </div>
+
+    <div class="arch-layer">
+      <div class="arch-title">🖥️ PRESENTATION LAYER (Client)</div>
+      <div class="arch-items">
+        <span class="arch-chip">React Native (mobile)</span>
+        <span class="arch-chip">React.js (web)</span>
+        <span class="arch-chip">Progressive Web App</span>
+        <span class="arch-chip">Framer Motion (animations)</span>
+        <span class="arch-chip">WebSocket (real-time status)</span>
+      </div>
+    </div>
+
+    <div class="arch-layer blue">
+      <div class="arch-title">🔌 API GATEWAY & ORCHESTRATION</div>
+      <div class="arch-items">
+        <span class="arch-chip">Node.js BFF (Backend for Frontend)</span>
+        <span class="arch-chip">GraphQL API</span>
+        <span class="arch-chip">JWT Auth + OTP (2FA)</span>
+        <span class="arch-chip">Rate limiting</span>
+        <span class="arch-chip">Request caching (Redis)</span>
+        <span class="arch-chip">Axios circuit breaker</span>
+      </div>
+    </div>
+
+    <div class="arch-layer green">
+      <div class="arch-title">🤖 RECOMMENDATION ENGINE (Core)</div>
+      <div class="arch-items">
+        <span class="arch-chip">Python (FastAPI)</span>
+        <span class="arch-chip">Scoring model (rule-based v1 → ML v2)</span>
+        <span class="arch-chip">Feature extraction pipeline</span>
+        <span class="arch-chip">Card eligibility filter</span>
+        <span class="arch-chip">Explainability module</span>
+        <span class="arch-chip">A/B test harness</span>
+      </div>
+    </div>
+
+    <div class="arch-layer orange">
+      <div class="arch-title">📡 EXTERNAL INTEGRATIONS</div>
+      <div class="arch-items">
+        <span class="arch-chip">Axis Bank Card API</span>
+        <span class="arch-chip">CIBIL / Experian Soft Pull API</span>
+        <span class="arch-chip">SMS Consent SDK (Perfios / FinBox)</span>
+        <span class="arch-chip">Account Aggregator (AA) Framework</span>
+        <span class="arch-chip">Setu / Bureau API</span>
+        <span class="arch-chip">Firebase Push Notifications</span>
+      </div>
+    </div>
+
+    <div class="arch-layer red">
+      <div class="arch-title">🗄️ DATA LAYER</div>
+      <div class="arch-items">
+        <span class="arch-chip">PostgreSQL (user profiles)</span>
+        <span class="arch-chip">MongoDB (event logs)</span>
+        <span class="arch-chip">Redis (session cache)</span>
+        <span class="arch-chip">S3 (statement uploads)</span>
+        <span class="arch-chip">Kafka (event streaming)</span>
+        <span class="arch-chip">Snowflake (analytics DW)</span>
+      </div>
+    </div>
+
+    <div class="arch-layer" style="border-left-color:#6b7280;">
+      <div class="arch-title">🛡️ SECURITY & COMPLIANCE</div>
+      <div class="arch-items">
+        <span class="arch-chip">AES-256 encryption at rest</span>
+        <span class="arch-chip">TLS 1.3 in transit</span>
+        <span class="arch-chip">RBI DPSP compliance</span>
+        <span class="arch-chip">DPDPA 2023 consent framework</span>
+        <span class="arch-chip">PCI-DSS (card data isolation)</span>
+        <span class="arch-chip">SOC 2 Type II</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 6. DATA STRATEGY ══ -->
+  <section id="data">
+    <div class="section-number">SECTION 06</div>
+    <h2>Data Strategy</h2>
+    <p class="section-intro">What data powers the recommendation, how it's collected, and how it improves over time.</p>
+
+    <h3>Data Inputs & Signal Quality</h3>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Data Source</th>
+            <th>Signal Extracted</th>
+            <th>Collection Method</th>
+            <th>Consent Required</th>
+            <th>Quality</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Self-declared (survey)</strong></td>
+            <td>Spend categories, income range, preference</td>
+            <td>4-question micro-survey</td>
+            <td>Implicit (app usage)</td>
+            <td><span class="tag tag-med">Medium</span></td>
+          </tr>
+          <tr>
+            <td><strong>Freecharge UPI graph</strong></td>
+            <td>Transaction frequency, merchant categories, monthly volume</td>
+            <td>Internal platform data</td>
+            <td>App T&amp;C</td>
+            <td><span class="tag tag-high">High</span></td>
+          </tr>
+          <tr>
+            <td><strong>SMS Parsing</strong></td>
+            <td>Bank debits, merchant names, EMI obligations, existing card spends</td>
+            <td>Device SMS with explicit opt-in</td>
+            <td>Explicit (toggle)</td>
+            <td><span class="tag tag-high">High</span></td>
+          </tr>
+          <tr>
+            <td><strong>Bureau Soft Pull</strong></td>
+            <td>Credit score band, active trade lines, DPD history, card utilisation</td>
+            <td>CIBIL / Experian API (soft inquiry)</td>
+            <td>Explicit (toggle)</td>
+            <td><span class="tag tag-high">High</span></td>
+          </tr>
+          <tr>
+            <td><strong>Bank Statement (AA)</strong></td>
+            <td>Salary credits, expense breakdown, merchant-level spend</td>
+            <td>Account Aggregator upload or AA consent</td>
+            <td>Explicit (toggle)</td>
+            <td><span class="tag tag-high">Very High</span></td>
+          </tr>
+          <tr>
+            <td><strong>Freecharge recharge history</strong></td>
+            <td>Prepaid/postpaid usage, operator, bill payment regularity</td>
+            <td>Internal platform data</td>
+            <td>App T&amp;C</td>
+            <td><span class="tag tag-med">Medium</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Recommendation Model — v1 vs v2</h3>
+    <div class="card-grid card-grid-2">
+      <div class="card">
+        <h4>v1 — Rule-Based Scoring (MVP)</h4>
+        <p>Each card has a weight vector across spend categories and preference dimensions. User's profile is dot-multiplied against card weights. Income eligibility acts as a hard filter. Fast, interpretable, and explainable — ships in week 4.</p>
+        <ul>
+          <li>Latency: &lt;50ms</li>
+          <li>Explainability: 100%</li>
+          <li>Accuracy: Baseline</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4>v2 — ML Model (Post-MVP)</h4>
+        <p>Gradient-boosted classifier trained on historical application + activation data. Features: spend patterns, bureau band, card tenure, peer cohort similarity. SHAP values drive the explainability layer.</p>
+        <ul>
+          <li>Latency: &lt;200ms</li>
+          <li>Training data: 90-day post-launch</li>
+          <li>Target: +15% conversion vs. v1</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Data Flywheel</h3>
+    <div class="callout callout-green">
+      <div class="callout-icon">🔄</div>
+      <div>Every application outcome (approved / rejected / activated / high-spend) feeds back into model training. Over time, the engine learns which user signals most reliably predict card activation and 90-day spend — improving recommendation quality with each cohort.</div>
+    </div>
+  </section>
+
+  <!-- ══ 7. USER STORIES ══ -->
+  <section id="stories">
+    <div class="section-number">SECTION 07</div>
+    <h2>User Stories & Acceptance Criteria</h2>
+    <p class="section-intro">Written in standard format. Grouped by epic.</p>
+
+    <h3>Epic 1 — Onboarding & Consent</h3>
+
+    <div class="story-card">
+      <div class="story-header">
+        <div class="story-id">US-01 · Consent Screen</div>
+        <span class="tag tag-must">Must Have</span>
+      </div>
+      <div class="story-quote">"As a first-time user, I want to understand what data will be used and choose what I'm comfortable sharing, so that I can trust the platform before providing any personal information."</div>
+      <div class="story-ac-title">ACCEPTANCE CRITERIA</div>
+      <div class="ac-item">User sees three distinct data-sharing options with plain-English descriptions before any data is collected.</div>
+      <div class="ac-item">Each option can be toggled independently; selecting none still allows the user to proceed via self-declared data only.</div>
+      <div class="ac-item">A persistent privacy note states "no hard credit pull" and links to the full privacy policy.</div>
+      <div class="ac-item">OTP verification completes within 30 seconds; failed OTP shows a re-send option after 60 seconds.</div>
+      <div class="ac-item">Consent selections are logged with a timestamp and stored per RBI DPSP guidelines.</div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-header">
+        <div class="story-id">US-02 · Returning User Pre-fill</div>
+        <span class="tag tag-should">Should Have</span>
+      </div>
+      <div class="story-quote">"As a returning Freecharge user, I want my existing profile data (name, income, spend history) to be pre-filled in the recommendation form, so that I don't have to re-enter information I've already provided."</div>
+      <div class="story-ac-title">ACCEPTANCE CRITERIA</div>
+      <div class="ac-item">Returning users who log in via phone OTP see pre-populated spend category suggestions derived from UPI transaction history.</div>
+      <div class="ac-item">Pre-filled values are clearly labelled as "Based on your Freecharge activity".</div>
+      <div class="ac-item">User can override any pre-filled value before proceeding.</div>
+      <div class="ac-item">If no prior data exists, standard empty form is shown without error.</div>
+    </div>
+
+    <h3>Epic 2 — Data Collection</h3>
+
+    <div class="story-card">
+      <div class="story-header">
+        <div class="story-id">US-03 · Spend Category Selection</div>
+        <span class="tag tag-must">Must Have</span>
+      </div>
+      <div class="story-quote">"As a user who spends heavily on fuel and dining, I want to quickly select my top spending categories from a visual grid, so that the engine understands my lifestyle without me having to type anything."</div>
+      <div class="story-ac-title">ACCEPTANCE CRITERIA</div>
+      <div class="ac-item">Category grid shows at least 6 options (Fuel, Travel, Dining, Shopping, EMI/Bills, Entertainment) with icons.</div>
+      <div class="ac-item">User can select up to 3 categories; a visual indicator shows selection count.</div>
+      <div class="ac-item">Attempting to select a 4th category shows an inline message "You can pick up to 3".</div>
+      <div class="ac-item">The Next button remains disabled until at least 1 category is selected.</div>
+      <div class="ac-item">Selected categories are stored in session and passed to the scoring engine.</div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-header">
+        <div class="story-id">US-04 · Monthly Spend Slider</div>
+        <span class="tag tag-must">Must Have</span>
+      </div>
+      <div class="story-quote">"As a user, I want to indicate my monthly card spend with a slider rather than typing an exact number, so that the process feels fast and frictionless."</div>
+      <div class="story-ac-title">ACCEPTANCE CRITERIA</div>
+      <div class="ac-item">Slider range is ₹5,000 to ₹2,00,000 with steps of ₹5,000.</div>
+      <div class="ac-item">Current value is shown in real-time in a large, prominent format (e.g., "₹30,000 / month").</div>
+      <div class="ac-item">Slider defaults to ₹30,000 (platform median).</div>
+      <div class="ac-item">Slider is keyboard-accessible and WCAG 2.1 AA compliant.</div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-header">
+        <div class="story-id">US-05 · SMS Spend Analysis</div>
+        <span class="tag tag-should">Should Have</span>
+      </div>
+      <div class="story-quote">"As a user who has given SMS consent, I want the engine to automatically detect my actual spending patterns, so that I get a more accurate recommendation without having to manually input anything."</div>
+      <div class="story-ac-title">ACCEPTANCE CRITERIA</div>
+      <div class="ac-item">If SMS consent is given, the system reads and parses bank SMSes via a certified SDK (e.g., FinBox, Perfios).</div>
+      <div class="ac-item">Parsing completes within 5 seconds; results are used to pre-select spend categories and populate the spend slider.</div>
+      <div class="ac-item">If parsing takes >5 seconds, the user proceeds with self-declared data; SMS results are merged when available.</div>
+      <div class="ac-item">Raw SMS content is never stored; only derived signals (category labels, spend ranges) are persisted.</div>
+      <div class="ac-item">User can review and dismiss any auto-detected category before proceeding.</div>
+    </div>
+
+    <h3>Epic 3 — Recommendation Engine</h3>
+
+    <div class="story-card">
+      <div class="story-header">
+        <div class="story-id">US-06 · Primary Recommendation Display</div>
+        <span class="tag tag-must">Must Have</span>
+      </div>
+      <div class="story-quote">"As a user who has completed the survey, I want to see a single best-fit card with a clear match score and personalised reasons, so that I immediately understand why this card is right for me."</div>
+      <div class="story-ac-title">ACCEPTANCE CRITERIA</div>
+      <div class="ac-item">Result screen shows exactly one primary recommendation above the fold.</div>
+      <div class="ac-item">Match score is displayed as a percentage with an animated progress bar that fills on load.</div>
+      <div class="ac-item">At least 3 personalised "Why this card" reasons are shown, each derived from the user's actual inputs (not static copy).</div>
+      <div class="ac-item">Key benefit chips (cashback %, annual fee, lounge visits, etc.) are displayed as scannable data points.</div>
+      <div class="ac-item">An "Apply Now" CTA is visible without scrolling on a standard mobile viewport (375px wide).</div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-header">
+        <div class="story-id">US-07 · Alternative Card Browsing</div>
+        <span class="tag tag-should">Should Have</span>
+      </div>
+      <div class="story-quote">"As a user who wants to compare options, I want to see alternative card recommendations and swap any one to the top position, so that I feel in control of my decision."</div>
+      <div class="story-ac-title">ACCEPTANCE CRITERIA</div>
+      <div class="ac-item">At least 2 alternative cards are shown below the primary recommendation with their match scores.</div>
+      <div class="ac-item">Tapping an alternative card promotes it to primary and recalculates the "Why this card" section for that card.</div>
+      <div class="ac-item">A "Compare" button opens a side-by-side comparison modal (v2 scope; in v1 shows a toast "Coming soon").</div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-header">
+        <div class="story-id">US-08 · Benefit Calculator</div>
+        <span class="tag tag-could">Could Have</span>
+      </div>
+      <div class="story-quote">"As a user considering the Axis ACE card, I want to see a projected annual savings figure based on my stated spend, so that I have a concrete financial reason to apply."</div>
+      <div class="story-ac-title">ACCEPTANCE CRITERIA</div>
+      <div class="ac-item">Projected annual cashback / miles value is calculated using the user's stated monthly spend × card earn rate.</div>
+      <div class="ac-item">Annual fee is deducted to show net benefit ("₹4,800 cashback – ₹499 fee = ₹4,301 net gain").</div>
+      <div class="ac-item">Disclaimer: "Indicative estimate. Actual value depends on transaction categories and bank terms."</div>
+    </div>
+
+    <h3>Epic 4 — Application & Post-Apply</h3>
+
+    <div class="story-card">
+      <div class="story-header">
+        <div class="story-id">US-09 · Instant Application Submission</div>
+        <span class="tag tag-must">Must Have</span>
+      </div>
+      <div class="story-quote">"As a user who has decided on a card, I want to apply in under 2 minutes with a pre-filled form, so that I don't lose momentum after the recommendation."</div>
+      <div class="story-ac-title">ACCEPTANCE CRITERIA</div>
+      <div class="ac-item">Application form is pre-filled with name, mobile, and income from earlier data collection.</div>
+      <div class="ac-item">User only needs to enter PAN and DOB to complete the form.</div>
+      <div class="ac-item">Form submits to Axis Bank API within 3 seconds of tapping "Submit".</div>
+      <div class="ac-item">Success screen shows a unique reference number and sets user expectation (24–48h TAT).</div>
+      <div class="ac-item">Submission event is tracked in analytics for funnel reporting.</div>
+    </div>
+
+    <div class="story-card">
+      <div class="story-header">
+        <div class="story-id">US-10 · Rejection Recovery</div>
+        <span class="tag tag-should">Should Have</span>
+      </div>
+      <div class="story-quote">"As a user whose application was rejected, I want to immediately see the next best card I'm eligible for, so that I don't leave the platform without an option."</div>
+      <div class="story-ac-title">ACCEPTANCE CRITERIA</div>
+      <div class="ac-item">If Axis Bank API returns a rejection, the system immediately re-runs the scoring engine excluding the rejected card and adjusting the eligibility filter.</div>
+      <div class="ac-item">Rejection screen shows a sympathetic message + the next-best card with a new apply CTA.</div>
+      <div class="ac-item">Rejection reason (if provided by bank API) is translated into user-friendly language (e.g., "Your income range is below the requirement for this card").</div>
+      <div class="ac-item">All rejection events are logged for model improvement.</div>
+    </div>
+  </section>
+
+  <!-- ══ 8. PRIORITIZATION ══ -->
+  <section id="prioritization">
+    <div class="section-number">SECTION 08</div>
+    <h2>Prioritization Framework</h2>
+    <p class="section-intro">MoSCoW for MVP scope definition + RICE for development sequencing.</p>
+
+    <h3>MoSCoW Analysis</h3>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="data-table">
+        <thead>
+          <tr><th>Feature</th><th>Priority</th><th>Rationale</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Consent screen with toggleable data sources</td><td><span class="tag tag-must">Must</span></td><td>Legal requirement + trust foundation</td></tr>
+          <tr><td>4-step micro-survey (categories, spend, income, pref)</td><td><span class="tag tag-must">Must</span></td><td>Core data collection; MVP blocker</td></tr>
+          <tr><td>Rule-based scoring engine (v1)</td><td><span class="tag tag-must">Must</span></td><td>Required for any recommendation output</td></tr>
+          <tr><td>Recommendation result page with match score + explainability</td><td><span class="tag tag-must">Must</span></td><td>Core product value; pitch requirement</td></tr>
+          <tr><td>Axis Bank application form submission</td><td><span class="tag tag-must">Must</span></td><td>Revenue trigger; without it product has no conversion</td></tr>
+          <tr><td>SMS spend parsing (with consent)</td><td><span class="tag tag-should">Should</span></td><td>Major accuracy lift; SDK dependency</td></tr>
+          <tr><td>Bureau soft pull integration</td><td><span class="tag tag-should">Should</span></td><td>Eligibility filtering; API contract needed</td></tr>
+          <tr><td>Alternative card browsing with swap</td><td><span class="tag tag-should">Should</span></td><td>Improves confidence; moderate effort</td></tr>
+          <tr><td>Returning user pre-fill (Freecharge data)</td><td><span class="tag tag-should">Should</span></td><td>Reduces friction for existing users</td></tr>
+          <tr><td>Application status tracking (in-app)</td><td><span class="tag tag-should">Should</span></td><td>Retention + trust post-apply</td></tr>
+          <tr><td>Rejection recovery flow</td><td><span class="tag tag-should">Should</span></td><td>Revenue recovery; moderate effort</td></tr>
+          <tr><td>Benefit calculator (projected savings)</td><td><span class="tag tag-could">Could</span></td><td>Nice conversion lift; post-MVP polish</td></tr>
+          <tr><td>Side-by-side card comparison modal</td><td><span class="tag tag-could">Could</span></td><td>Power user feature; v2 roadmap</td></tr>
+          <tr><td>ML-based recommendation engine (v2)</td><td><span class="tag tag-could">Could</span></td><td>Requires 90 days of training data</td></tr>
+          <tr><td>WhatsApp notification channel</td><td><span class="tag tag-could">Could</span></td><td>Additional channel; not MVP critical</td></tr>
+          <tr><td>Credit score improvement tips</td><td><span class="tag tag-wont">Won't (v1)</span></td><td>Adjacent product; scope creep risk</td></tr>
+          <tr><td>Multi-bank card comparison (non-Axis)</td><td><span class="tag tag-wont">Won't (v1)</span></td><td>Out of scope per Axis Bank partnership</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>RICE Scoring — Top 8 Must/Should features</h3>
+    <div class="card" style="padding:0;overflow:hidden;">
+      <table class="rice-table">
+        <thead>
+          <tr><th>Feature</th><th>Reach</th><th>Impact</th><th>Confidence</th><th>Effort (weeks)</th><th>RICE Score</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>4-step micro-survey</td><td>100%</td><td>3</td><td>95%</td><td>1</td><td class="rice-score">285</td></tr>
+          <tr><td>Rule-based engine v1</td><td>100%</td><td>3</td><td>90%</td><td>2</td><td class="rice-score">135</td></tr>
+          <tr><td>Result page + explainability</td><td>100%</td><td>3</td><td>85%</td><td>2</td><td class="rice-score">127</td></tr>
+          <tr><td>Consent screen</td><td>100%</td><td>2</td><td>95%</td><td>1</td><td class="rice-score">190</td></tr>
+          <tr><td>Application form + submit</td><td>80%</td><td>3</td><td>80%</td><td>2</td><td class="rice-score">96</td></tr>
+          <tr><td>SMS parsing integration</td><td>60%</td><td>2</td><td>70%</td><td>3</td><td class="rice-score">28</td></tr>
+          <tr><td>Bureau soft pull</td><td>60%</td><td>2</td><td>65%</td><td>3</td><td class="rice-score">26</td></tr>
+          <tr><td>Rejection recovery</td><td>20%</td><td>3</td><td>80%</td><td>1</td><td class="rice-score">48</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-top:8px;">RICE = (Reach × Impact × Confidence) / Effort. Reach = % of users who see the feature. Impact: 1=low, 2=med, 3=high. Effort in person-weeks.</p>
+  </section>
+
+  <!-- ══ 9. SPRINT PLAN ══ -->
+  <section id="sprints">
+    <div class="section-number">SECTION 09</div>
+    <h2>MVP Sprint Plan (8 Weeks)</h2>
+    <p class="section-intro">Two-week sprints. Assumes a team of 2 frontend, 2 backend, 1 ML, 1 QA, 1 PM.</p>
+
+    <div class="sprint-block">
+      <div class="sprint-title">Sprint 1 (Weeks 1–2) — Foundation</div>
+      <div class="sprint-items">
+        <div class="sprint-item">🏗️ Project setup, repo, CI/CD pipeline <span class="story-pts">3 pts</span></div>
+        <div class="sprint-item">🔐 OTP auth + session management <span class="story-pts">5 pts</span></div>
+        <div class="sprint-item">📱 Consent screen UI (all 3 toggles) <span class="story-pts">5 pts</span></div>
+        <div class="sprint-item">📋 4-step micro-survey (Q1 + Q2) <span class="story-pts">8 pts</span></div>
+        <div class="sprint-item">🗄️ DB schema: users, consent_logs, sessions <span class="story-pts">3 pts</span></div>
+      </div>
+    </div>
+
+    <div class="sprint-block">
+      <div class="sprint-title">Sprint 2 (Weeks 3–4) — Core Engine</div>
+      <div class="sprint-items">
+        <div class="sprint-item">📋 4-step survey (Q3 + Q4) + validation <span class="story-pts">5 pts</span></div>
+        <div class="sprint-item">🤖 Scoring engine v1 (rule-based, all 5 cards) <span class="story-pts">8 pts</span></div>
+        <div class="sprint-item">✨ Explainability module (why-item mapping) <span class="story-pts">5 pts</span></div>
+        <div class="sprint-item">📊 Result page UI — card visual + match score <span class="story-pts">8 pts</span></div>
+        <div class="sprint-item">🔄 Loading screen with step animation <span class="story-pts">3 pts</span></div>
+      </div>
+    </div>
+
+    <div class="sprint-block">
+      <div class="sprint-title">Sprint 3 (Weeks 5–6) — Integrations</div>
+      <div class="sprint-items">
+        <div class="sprint-item">📡 Axis Bank application API integration <span class="story-pts">13 pts</span></div>
+        <div class="sprint-item">📝 Pre-filled application form + PAN/DOB fields <span class="story-pts">5 pts</span></div>
+        <div class="sprint-item">✅ Success + reference number screen <span class="story-pts">3 pts</span></div>
+        <div class="sprint-item">🔔 Firebase push notification setup <span class="story-pts">5 pts</span></div>
+        <div class="sprint-item">🔄 Alternative card swap on result page <span class="story-pts">5 pts</span></div>
+      </div>
+    </div>
+
+    <div class="sprint-block">
+      <div class="sprint-title">Sprint 4 (Weeks 7–8) — Polish, QA & Launch</div>
+      <div class="sprint-items">
+        <div class="sprint-item">❌ Rejection recovery flow <span class="story-pts">8 pts</span></div>
+        <div class="sprint-item">👤 Returning user pre-fill (Freecharge data) <span class="story-pts">5 pts</span></div>
+        <div class="sprint-item">🧪 End-to-end QA + bug fixes <span class="story-pts">8 pts</span></div>
+        <div class="sprint-item">📈 Analytics events (Mixpanel / Amplitude) <span class="story-pts">5 pts</span></div>
+        <div class="sprint-item">🚀 Staging → Production deploy + stakeholder demo <span class="story-pts">3 pts</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 10. SUCCESS METRICS ══ -->
+  <section id="metrics">
+    <div class="section-number">SECTION 10</div>
+    <h2>Success Metrics (KPIs)</h2>
+    <p class="section-intro">North-star and supporting metrics, measured at 30/60/90 days post-launch.</p>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-value">40%</div>
+        <div class="kpi-label">Survey Completion Rate</div>
+        <div class="kpi-baseline">Baseline: ~22% industry avg</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">35%</div>
+        <div class="kpi-label">Apply CTA Click Rate</div>
+        <div class="kpi-baseline">Baseline: ~12% aggregators</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">25%</div>
+        <div class="kpi-label">Application Submission Rate</div>
+        <div class="kpi-baseline">Baseline: ~8% traditional</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">60%</div>
+        <div class="kpi-label">Card Activation Rate</div>
+        <div class="kpi-baseline">Baseline: ~45% industry</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">&lt;3 min</div>
+        <div class="kpi-label">Avg. Journey Completion</div>
+        <div class="kpi-baseline">Baseline: 12–18 min</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">70%</div>
+        <div class="kpi-label">SMS Consent Opt-in</div>
+        <div class="kpi-baseline">Target for richer signals</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">4.5★</div>
+        <div class="kpi-label">Recommendation Satisfaction (CSAT)</div>
+        <div class="kpi-baseline">Post-recommendation survey</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value">₹90K</div>
+        <div class="kpi-label">Avg. 90-day Card Spend</div>
+        <div class="kpi-baseline">Revenue share trigger</div>
+      </div>
+    </div>
+
+    <h3>Funnel Tracking</h3>
+    <div class="card">
+      <p>Every stage transition is an analytics event. The funnel is: <strong>Hero Viewed → Consent Submitted → Q1 → Q2 → Q3 → Q4 → Recommendation Viewed → Apply Clicked → Form Submitted → Approved</strong>. Drop-off percentage at each step triggers automated alerts in the PM dashboard when it exceeds a configured threshold.</p>
+    </div>
+  </section>
+
+  <!-- ══ 11. RISKS ══ -->
+  <section id="risks">
+    <div class="section-number">SECTION 11</div>
+    <h2>Risks & Mitigations</h2>
+
+    <div class="card">
+      <div class="risk-row">
+        <div class="risk-icon">🔴</div>
+        <div>
+          <div class="risk-title">Bureau API Latency / Downtime</div>
+          <div class="risk-desc">CIBIL / Experian APIs can be slow (3–8s) or return errors during peak hours, breaking the user flow.</div>
+          <div class="risk-mit">✓ Mitigation: Circuit breaker pattern. If bureau API times out in >3s, silently skip and run engine on self-declared data. Bureau data merged asynchronously when available.</div>
+        </div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-icon">🔴</div>
+        <div>
+          <div class="risk-title">SMS Consent Drop-off</div>
+          <div class="risk-desc">Users may distrust SMS access even with clear consent language, limiting signal quality.</div>
+          <div class="risk-mit">✓ Mitigation: SMS consent is optional. Value framing ("Get a more accurate match") is shown. A/B test consent copy. Engine works without it.</div>
+        </div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-icon">🟠</div>
+        <div>
+          <div class="risk-title">Axis Bank API Contract Delays</div>
+          <div class="risk-desc">Bank API documentation and sandbox access can take 4–6 weeks to procure.</div>
+          <div class="risk-mit">✓ Mitigation: Mock the Axis API in staging from week 1. Parallelize API negotiation with frontend development. Apply flow can use a Typeform fallback for the pitch demo.</div>
+        </div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-icon">🟠</div>
+        <div>
+          <div class="risk-title">Low Recommendation Accuracy (v1)</div>
+          <div class="risk-desc">Rule-based scoring may surface a suboptimal card for edge-case user profiles, eroding trust.</div>
+          <div class="risk-mit">✓ Mitigation: Curate weights carefully with data from Axis Bank's top-performing card cohorts. Add a post-recommendation "Was this helpful?" micro-survey to flag bad matches fast.</div>
+        </div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-icon">🟡</div>
+        <div>
+          <div class="risk-title">DPDPA 2023 Compliance</div>
+          <div class="risk-desc">India's Digital Personal Data Protection Act 2023 mandates explicit consent, purpose limitation, and data deletion rights.</div>
+          <div class="risk-mit">✓ Mitigation: All consent is explicit, logged, and timestamped. Data deletion endpoint built from week 1. Legal review of consent copy before launch.</div>
+        </div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-icon">🟡</div>
+        <div>
+          <div class="risk-title">Competition from Bank Direct Channels</div>
+          <div class="risk-desc">Axis Bank may divert traffic to its own app, reducing referral value of FreechargeBiz.</div>
+          <div class="risk-mit">✓ Mitigation: Differentiate on multi-card comparison, neutral advisory positioning, and Freecharge's existing user trust. Lock in an exclusive referral fee structure in the partnership agreement.</div>
+        </div>
+      </div>
+    </div>
+
+    <hr/>
+
+    <div class="callout callout-purple">
+      <div class="callout-icon">📌</div>
+      <div><strong>Document owner:</strong> Product Manager, FreechargeBiz Credit Cards. <strong>Review cycle:</strong> Bi-weekly sprint reviews. <strong>Next milestone:</strong> Stakeholder sign-off on MVP scope → Sprint 1 kickoff.</div>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<script>
+  // Sidebar active link on scroll
+  const links = document.querySelectorAll('.sidebar-link');
+  const sections = document.querySelectorAll('section[id], div[id="overview"]');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 80) current = s.id;
+    });
+    links.forEach(l => {
+      l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+    });
+  });
+</script>
+</body>
+</html>
